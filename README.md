@@ -9,3 +9,4 @@ To maintain clarity in our commit history, it is advisable to use a consistent f
 ### Example Messages
 
 - `#123: fix: Update README.md formatting`
+- `#456: feat: Add new feature`
