@@ -1,0 +1,56 @@
+name: Main workflow
+# Triggers the workflow on push or pull request events
+on:
+  pull_request:
+    branches:
+      - develop
+      - release
+      - master
+    types: [opened, synchronize, closed]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # sonarcloud:
+  #   name: SonarCloud
+  #   if: github.event.action == 'opened' || github.event.action == 'synchronize'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+  #     - name: SonarCloud Scan
+  #       uses: SonarSource/sonarcloud-github-action@v2.0.2
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+  #         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  tag:
+    name: AutoTag
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sleep for 60 seconds
+        run: sleep 60
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Set Git Config
+        run: |
+          git config --global user.email "test@test.com"
+          git config --global user.name "test"
+      - name: Create Git Tag
+        # env:
+        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pr_title="${{ github.event.pull_request.title }}"
+          if ! [[ $pr_title =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Error: Invalid PR title format"
+            exit 1
+          else
+            echo "PR title format is valid"
+          fi
+          pr_body=$(echo "${{ github.event.pull_request.body }}" | grep -oP 'RC-\d+')
+          git tag -a "$pr_title" -m "$pr_body"
+          git push origin --tags
