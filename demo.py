@@ -17,3 +17,4 @@ print(add(1, 2))
 
 API_URL = config.API_URL
 print(API_URL)
+print(config.DB_HOST)
