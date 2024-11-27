@@ -51,6 +51,6 @@ jobs:
           else
             echo "PR title format is valid"
           fi
-          pr_body=$(echo "${{ github.event.pull_request.body }}" | grep -oP 'RC-\d+')
+          pr_body=$(echo "${{ github.event.pull_request.body }}" | grep -oP '^\#\s*\d+:\s*.*')
           git tag -a "$pr_title" -m "$pr_body"
           git push origin --tags
